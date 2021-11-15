@@ -271,14 +271,20 @@ def get_20_most_popular():
      'subtype': 'Jeans', 'color': 'Black', 'gender': 'Male', 'price': 449,
      'size': 'S'}]
     """
-
-    df = pd.read_csv(cmd_folder + 'data/Orders.csv')
-    top20_ids = df.groupby(['id']).sum().loc[:, ['amount']].sort_values(
-        'amount', ascending=False).iloc[:20].index.tolist()
-    df = pd.read_csv(cmd_folder + 'data/Products.csv')
-
-    return df.iloc[top20_ids, :].to_dict('records')
-
+    cnx.execute('''SELECT
+            *
+        FROM
+            ProductInformation
+        INNER JOIN (
+            SELECT
+                ProductID
+            FROM CustomerOrderLine
+            GROUP BY ProductID
+            ORDER BY SUM(amount) DESC
+            LIMIT 20
+        ) AS PopularProducts ON ProductInformation.ID = PopularProducts.ProductID
+        ''')
+    return cnx.fetchall()
 
 def main():
     # test = get_products_filtered({'type': 'Bags', 'subtype': 'Leather bag'})
