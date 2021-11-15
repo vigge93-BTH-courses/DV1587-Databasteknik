@@ -119,12 +119,12 @@ def get_products_ids(ids):
     {'id': 443, 'brand': 'Cheap Monday', 'type': 'Pants, 'subtype': 'Jeans',
      'color': 'Black', 'gender': 'Male', 'price': 449, 'size': 'S'}]
     """
-
-    df = pd.read_csv(cmd_folder + 'data/Products.csv')
-    df = df.loc[df['id'].isin(ids)]
-    ''' SQL '''
-
-    return df.to_dict('records')
+    ids = list(ids) # Expand map object
+    cnx.execute(f'''
+        SELECT * FROM ProductInformation
+        WHERE ID IN ({'%s, '*(len(ids)-1)} %s)
+    ''', ids)
+    return cnx.fetchall()
 
 
 def get_categories():
