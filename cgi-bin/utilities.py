@@ -223,9 +223,6 @@ def write_order(order):
         produkt 3.
     """
 
-    df_orders = pd.read_csv(cmd_folder + 'data/Orders.csv')
-    # Get new order ID
-    orderID = df_orders['orderid'].max() + 1
     # Grab the products id number and the amount of each product
     item_ids = list(map(int, order['items'].strip('[]').split(',')))
     items = [{
@@ -244,19 +241,28 @@ def write_order(order):
     zipcode = order['zipcode']
     town = order['town']
 
-    # Write the actual order
-    df_products = pd.read_csv(cmd_folder + 'data/Products.csv')
+    cnx.execute('''SELECT ID from customer WHERE
+        firstname = %s AND lastname = %s 
+        AND street = %s
+        AND zipcode = %s AND city = %s
+        ''' # AND email = %s'''
+        , (firstname, lastname, # email,
+                                            address, zipcode, town))
+    customerId = cnx.fetchone()['ID']
+    if customerId is None:
+        cnx.execute('''INSERT INTO customer (firstname, lastname,
+            street, zipcode, city) VALUES (%s, %s, %s, %s, %s)''',
+                    (firstname, lastname, address, zipcode, town))
+        customerId = cnx.lastrowid
+    
+    cnx.execute('SELECT MAX(orderId) AS nextId FROM customerOrderLine')
+    nextOrderId = cnx.fetchone()['nextId'] + 1
     for item in items:
-        product = df_products[df_products['id'] == item['id']].to_dict(
-            'records')[0]
-        df_orders.loc[len(df_orders)] = [
-            orderID, firstname, lastname, address, town, zipcode,
-            product['id'], product['brand'], product['type'],
-            product['subtype'], product['color'], product['gender'],
-            product['price'], product['size'], item['amount']
-        ]
-    df_orders.to_csv(cmd_folder + 'data/Orders.csv', index=False, encoding='utf-8')
-
+        cnx.execute('''INSERT INTO customerOrderLine (orderId, customerId,
+            productId, amount) VALUES (%s, %s, %s, %s)''',
+                    (nextOrderId, customerId, item['id'],
+                     item['amount']))
+    connection.commit()
 
 def get_20_most_popular():
     """
