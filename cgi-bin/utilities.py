@@ -302,7 +302,7 @@ def get_20_most_popular():
     return cnx.fetchall()
 
 def main():
-    # test = get_products_filtered({'type': 'Bags', 'subtype': 'Leather bag'})
+    # test = get_products_filtered({'type': 'Bags', 'subtype': 'Leather bag', 'gender': 'Male'})
     # test = get_products_ids([1,2,3])
     # test = get_categories()
     # test = get_subcategories('Female', 'Bags')
