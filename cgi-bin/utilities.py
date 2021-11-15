@@ -143,30 +143,19 @@ def get_categories():
     {'title': 'Herr', 'children': [{'url': '', 'name': 'Tröjor'},
                                    {'url': '', 'name': 'Väskor'}]}]
     """
-
-    df = pd.read_csv(cmd_folder + 'data/Products.csv')
-    genders = df['gender'].unique()
-    types = [
-        df[(df['gender'] == genders[0])]['type'].unique().tolist(),
-        df[(df['gender'] == genders[1])]['type'].unique().tolist()
-    ]
-    children = [[{
-        'url': '',
-        'name': name
-    } for name in types[0]], [{
-        'url': '',
-        'name': name
-    } for name in types[1]]]
-    ''' SQL '''
-
-    result = [{
-        'title': genders[0],
-        'children': children[0]
-    }, {
-        'title': genders[1],
-        'children': children[1]
-    }]
-    return result
+    cnx.execute('SELECT id, name title FROM gender')
+    genders = cnx.fetchall()
+    for gender in genders:
+        cnx.execute('''SELECT DISTINCT
+                Type.name,
+                '' as url
+            FROM
+                `Type`
+                LEFT JOIN Product ON Product.TypeID = Type.ID
+            WHERE genderId = %s;''', (gender['id'], ))
+        gender['children'] = cnx.fetchall()
+        del gender['id']
+    return genders
 
 
 def get_subcategories(gender, category):
