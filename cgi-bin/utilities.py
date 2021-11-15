@@ -4,9 +4,23 @@
 import pandas as pd
 from os import path
 from inspect import currentframe, getfile
+import mysql.connector as mysql
 
 cmd_folder = path.realpath(
     path.abspath(path.split(getfile(currentframe()))[0])) + '/'
+
+MYSQL_USER =  'root' #replace with your user name.
+MYSQL_PASS =  None #replace with your MySQL server password
+MYSQL_DATABASE = 'webshop'#replace with your database name
+
+connection = mysql.connect(user=MYSQL_USER,
+                           passwd=MYSQL_PASS,
+                           database=MYSQL_DATABASE, 
+                           host='127.0.0.1')
+# connection.autocommit = True
+
+cnx = connection.cursor(dictionary=True)
+# connection.close()
 
 def get_products_filtered(categories=None):
     """
