@@ -43,20 +43,26 @@ def get_products_filtered(categories=None):
     size: Storleken på plagget
 
     Exempelvis:
-    [{'id': 1, 'brand': 'WESC', 'type': 'Shirt, 'subtype': 'T-shirt',
+    [{'id': 1, 'brand': 'WESC', 'type': 'Shirt', 'subtype': 'T-shirt',
        'color': 'Red', 'gender': 'Female', 'price': 299, 'size': 'M'},
     ...,
     {'id': 443, 'brand': 'Cheap Monday', 'type': 'Pants, 'subtype': 'Jeans',
      'color': 'Black', 'gender': 'Male', 'price': 449, 'size': 'S'}]
     """
 
-    df = pd.read_csv(cmd_folder + 'data/Products.csv')
-    if categories is not None:
-        for category in categories.keys():
-            df = df[df[category] == categories[category]]
-    ''' SQL '''
+    if categories is None:
+        cnx.execute('''SELECT * FROM productInformation''')
+    else:
+        cnx.execute('''SELECT
+            *
+        FROM
+            productInformation
+        WHERE gender = %s
+            AND type = %s
+            AND subtype = %s''',
+            (categories['gender'], categories['type'], categories['subtype']))
 
-    return df.to_dict('records')
+    return cnx.fetchall()
 
 
 def get_products_search(values):
