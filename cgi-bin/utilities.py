@@ -86,12 +86,15 @@ def get_products_search(values):
      'color': 'Black', 'gender': 'Male', 'price': 449, 'size': 'S'},
     ]
     """
-
-    df = pd.read_csv(cmd_folder + 'data/Products.csv')
-    df = df[df['brand'].str.contains('(?i)' + '|'.join(values))]
-    ''' SQL '''
-
-    return df.to_dict('records')
+    
+    result = []
+    for value in values:
+        cnx.execute(f'''
+            SELECT * FROM ProductInformation
+            WHERE brand LIKE %s
+        ''', ('%' + value + '%',))
+        result += cnx.fetchall()
+    return result
 
 
 def get_products_ids(ids):
