@@ -248,12 +248,14 @@ def write_order(order):
         ''' # AND email = %s'''
         , (firstname, lastname, # email,
                                             address, zipcode, town))
-    customerId = cnx.fetchone()['ID']
+    customerId = cnx.fetchone()
     if customerId is None:
         cnx.execute('''INSERT INTO customer (firstname, lastname,
             street, zipcode, city) VALUES (%s, %s, %s, %s, %s)''',
                     (firstname, lastname, address, zipcode, town))
         customerId = cnx.lastrowid
+    else:
+        customerId = customerId['ID']
     
     cnx.execute('SELECT MAX(orderId) AS nextId FROM customerOrderLine')
     nextOrderId = cnx.fetchone()['nextId'] + 1
