@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Victor Arvidsson
+# Group 6
 
 import pandas as pd
 from os import path
